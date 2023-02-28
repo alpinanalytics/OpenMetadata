@@ -44,7 +44,8 @@
         "DomoDatabase",
         "QueryLog",
         "CustomDatabase",
-        "Dbt"
+        "Dbt",
+        "Hana"
       ],
       "javaEnums": [
         {
@@ -136,6 +137,9 @@
         },
         {
           "name": "Dbt"
+        },
+        {
+          "name": "Hana"
         }
       ]
     },
@@ -229,6 +233,9 @@
             },
             {
               "$ref": "./connections/database/domoDatabaseConnection.json"
+            },
+            {
+              "$ref": "./connections/database/hanaConnection.json"
             },
             {
               "$ref": "./connections/database/customDatabaseConnection.json"

@@ -27,6 +27,7 @@ import domoDatabaseConnection from '../jsons/connectionSchemas/connections/datab
 import druidConnection from '../jsons/connectionSchemas/connections/database/druidConnection.json';
 import dynamoDBConnection from '../jsons/connectionSchemas/connections/database/dynamoDBConnection.json';
 import glueConnection from '../jsons/connectionSchemas/connections/database/glueConnection.json';
+import hanaConnection from '../jsons/connectionSchemas/connections/database/hanaConnection.json';
 import hiveConnection from '../jsons/connectionSchemas/connections/database/hiveConnection.json';
 import mariaDBConnection from '../jsons/connectionSchemas/connections/database/mariaDBConnection.json';
 import mssqlConnection from '../jsons/connectionSchemas/connections/database/mssqlConnection.json';
@@ -98,6 +99,11 @@ export const getDatabaseConfig = (type: DatabaseServiceType) => {
     }
     case DatabaseServiceType.Glue: {
       schema = glueConnection;
+
+      break;
+    }
+    case DatabaseServiceType.Hana: {
+      schema = hanaConnection;
 
       break;
     }
