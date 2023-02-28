@@ -159,6 +159,10 @@ plugins: Dict[str, Set[str]] = {
     },  # also requires requests-aws4auth which is in base
     "glue": {VERSIONS["boto3"]},
     "great-expectations": {VERSIONS["great-expectations"]},
+    "hana": {
+        "sqlalchemy-hana>=0.5.0",
+        "hdbcli>=2.15.22",
+    },
     "hive": {
         *COMMONS["hive"],
         "thrift>=0.13,<1",
