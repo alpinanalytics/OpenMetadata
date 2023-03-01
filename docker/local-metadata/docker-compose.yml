@@ -128,12 +128,17 @@ services:
       test: [ "CMD", "curl", "-f", "http://localhost:8586/healthcheck" ]
 
   ingestion:
+    container_name: openmetadata_ingestion
     build:
       context: ../../.
       dockerfile: ingestion/Dockerfile.ci
-      args:
-        INGESTION_DEPENDENCY: ${INGESTION_DEPENDENCY:-all}
-    container_name: openmetadata_ingestion
+    depends_on:
+      elasticsearch:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      openmetadata-server:
+        condition: service_started
     environment:
       AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -146,14 +151,7 @@ services:
       DB_PASSWORD: ${AIRFLOW_DB_PASSWORD:-airflow_pass}
     entrypoint: /bin/bash
     command:
-      - "/opt/airflow/ingestion_dependency.sh"
-    depends_on:
-      elasticsearch:
-        condition: service_started
-      mysql:
-        condition: service_healthy
-      openmetadata-server:
-        condition: service_started
+      - "/opt/airflow/run_server.sh"
     expose:
       - 8080
     ports:
@@ -164,8 +162,33 @@ services:
       - ingestion-volume-dag-airflow:/opt/airflow/dag_generated_configs
       - ingestion-volume-dags:/opt/airflow/dags
       - ingestion-volume-tmp:/tmp
-      - /var/run/docker.sock:/var/run/docker.sock:z  # Need 600 permissions to run DockerOperator
 
+  ingestion-worker:
+    build:
+      context: ../../.
+      dockerfile: ingestion/Dockerfile.ci
+    container_name: openmetadata_ingestion-worker
+    depends_on:
+      - ingestion
+    environment:
+      AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__OPENMETADATA_AIRFLOW_APIS__DAG_GENERATED_CONFIGS: "/opt/airflow/dag_generated_configs"
+      DB_HOST: ${AIRFLOW_DB_HOST:-mysql}
+      DB_PORT: ${AIRFLOW_DB_PORT:-3306}
+      AIRFLOW_DB: ${AIRFLOW_DB:-airflow_db}
+      AIRFLOW_DB_SCHEME: ${AIRFLOW_DB_SCHEME:-mysql+pymysql}
+      DB_USER: ${AIRFLOW_DB_USER:-airflow_user}
+      DB_PASSWORD: ${AIRFLOW_DB_PASSWORD:-airflow_pass}
+    entrypoint: /bin/bash
+    command:
+      - "/opt/airflow/run_worker.sh"
+    networks:
+      - local_app_net
+    volumes:
+      - ingestion-volume-dag-airflow:/opt/airflow/dag_generated_configs
+      - ingestion-volume-dags:/opt/airflow/dags
+      - ingestion-volume-tmp:/tmp
 
 networks:
   local_app_net:

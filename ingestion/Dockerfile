@@ -62,6 +62,8 @@ RUN apt-get update \
 
 # Required for Starting Ingestion Container in Docker Compose
 COPY --chown=airflow:0 ingestion/ingestion_dependency.sh /opt/airflow
+COPY --chown=airflow:0 ingestion/run_server.sh /opt/airflow
+COPY --chown=airflow:0 ingestion/run_worker.sh /opt/airflow
 # Required for Ingesting Sample Data
 COPY --chown=airflow:0 ingestion/examples/sample_data /home/airflow/ingestion/examples/sample_data
 # Required for Airflow DAGs of Sample Data
